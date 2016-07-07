@@ -10,6 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gky.aidldemo.aidl.IDownLoader;
 import com.gky.aidldemo.aidl.IDownLoaderListener;
@@ -22,12 +27,38 @@ public class MainActivity extends AppCompatActivity {
 
     private IDownLoader mDownLoader;
 
+    private String url = "http://117.27.243.24/apk.r1.market.hiapk.com/data/upload/apkres/2016/7_1/14/com.tencent.mm_025831.apk";
+
+    private ProgressBar mProgressBar;
+
+    private TextView mDownInfo;
+
+    private Button mBtStartDown;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.progress);
+        mDownInfo = (TextView) findViewById(R.id.tv_downinfo);
+        mBtStartDown = (Button) findViewById(R.id.bt_startdown);
+        mBtStartDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mDownLoader != null){
+                    try {
+                        mDownLoader.startDownLoader(url, mDownLoaderLister);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+                mBtStartDown.setEnabled(false);
+            }
+        });
+
         bindService(new Intent(this, MainService.class), mServiceConnection, BIND_AUTO_CREATE);
     }
 
@@ -35,18 +66,37 @@ public class MainActivity extends AppCompatActivity {
 
 
         @Override
-        public void onProgress(long curSize, long totalSize) throws RemoteException {
-
+        public void onProgress(final long curSize, final long totalSize) throws RemoteException {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int percent = (int) (curSize / totalSize);
+                    mProgressBar.setProgress(percent);
+                    String downInfo = String.format("%dMb/%dMb", ((curSize/1000)/1000),((totalSize/1000)/1000));
+                    mDownInfo.setText(downInfo);
+                    System.out.println(percent+"-"+downInfo);
+                }
+            });
         }
 
         @Override
         public void onSuccess() throws RemoteException {
-
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "DownLoad Successfully.", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         @Override
-        public void onFailed(String error) throws RemoteException {
-
+        public void onFailed(final String error) throws RemoteException {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "Down Error:"+error, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

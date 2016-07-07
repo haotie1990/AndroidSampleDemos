@@ -27,8 +27,13 @@ public class MainService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
         mDownLoadManager = (DownloadManager) getApplicationContext().getSystemService(DOWNLOAD_SERVICE);
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -42,6 +47,7 @@ public class MainService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            System.out.println("DownLoadReceiver");
             DownloadManager.Query query = new DownloadManager.Query();
             query.setFilterById(mTaskId);
             Cursor cursor = mDownLoadManager.query(query);
@@ -83,13 +89,15 @@ public class MainService extends Service {
 
         @Override
         public boolean startDownLoader(String path, IDownLoaderListener listener) throws RemoteException {
+            System.out.println(path);
             mListener = listener;
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(path));
             request.setAllowedOverRoaming(false);
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
-            request.setVisibleInDownloadsUi(false);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+            request.setVisibleInDownloadsUi(true);
             request.setDestinationInExternalPublicDir("/download/","");
             mTaskId = mDownLoadManager.enqueue(request);
+            System.out.println(mTaskId);
             getApplicationContext().registerReceiver(new DownLoadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             return true;
         }
