@@ -15,11 +15,13 @@
     tools:context="com.gky.toucheventdemo.MainActivity">
 
     <com.gky.toucheventdemo.CustomerLayout
+        android:id="@+id/customLy"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:padding="15dp">
 
         <com.gky.toucheventdemo.CustomerButton
+            android:id="@+id/customBt"
             android:text="Click Me"
             android:textColor="@android:color/black"
             android:textSize="18sp"
@@ -175,6 +177,36 @@
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/customBt_isDispatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"/>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:text="CustomerButton isHandleEvent"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left|center_vertical"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight="1"/>
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/customBt_isHandleEvent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"/>
