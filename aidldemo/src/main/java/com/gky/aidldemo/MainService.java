@@ -2,12 +2,11 @@ package com.gky.aidldemo;
 
 import android.app.DownloadManager;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -43,11 +42,16 @@ public class MainService extends Service {
         return new DownLoaderImpl();
     }
 
-    private class DownLoadReceiver extends BroadcastReceiver{
+    private class DownLoadObserver extends ContentObserver{
+
+        public DownLoadObserver() {
+            super(new Handler());
+        }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            System.out.println("DownLoadReceiver");
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            System.out.println("onChange");
             DownloadManager.Query query = new DownloadManager.Query();
             query.setFilterById(mTaskId);
             Cursor cursor = mDownLoadManager.query(query);
@@ -95,10 +99,14 @@ public class MainService extends Service {
             request.setAllowedOverRoaming(false);
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
             request.setVisibleInDownloadsUi(true);
-            request.setDestinationInExternalPublicDir("/download/","");
+            request.setDestinationInExternalPublicDir("/download/","my.apk");
+            request.setMimeType("application/vnd.android.package-archive");
+            request.setTitle("下载测试");
+
             mTaskId = mDownLoadManager.enqueue(request);
             System.out.println(mTaskId);
-            getApplicationContext().registerReceiver(new DownLoadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+            getApplicationContext().getContentResolver().registerContentObserver(Uri.parse("content://downloads/my_downloads"),true, new DownLoadObserver());
             return true;
         }
 
